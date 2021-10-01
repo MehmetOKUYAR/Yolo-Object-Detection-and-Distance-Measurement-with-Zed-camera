@@ -184,8 +184,10 @@ def main() :
                 distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
                                     point_cloud_value[1] * point_cloud_value[1] +
                                     point_cloud_value[2] * point_cloud_value[2])
+
                 print("Distance to Camera at (class : {0}, score : {1:0.2f}): distance : {2:0.2f} mm".format(LABELS[cl[0]], score[0], distance), end="\r")
-        
+                cv2.putText(img,"Distance: "+str(round(distance/1000,2))+'m',(int(int(left+width)-180),int(int(top+height)+30)),cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),1)
+                
                 cv2.imshow("Image", img)
                     
             

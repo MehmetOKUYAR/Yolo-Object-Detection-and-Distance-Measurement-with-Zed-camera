@@ -86,7 +86,7 @@ def main() :
                 'kirmizi_isk',
                 'sari_isik',
                 'yesil_isik']
-                
+
     COLORS = [[0, 0, 255]]
     prev_frame_time=0
     new_frame_time=0
@@ -127,6 +127,7 @@ def main() :
                                     point_cloud_value[1] * point_cloud_value[1] +
                                     point_cloud_value[2] * point_cloud_value[2])
                 print("Distance to Camera at (class : {0}, score : {1:0.2f}): distance : {2:0.2f} mm".format(LABELS[int(cl)], score, distance), end="\r")
+                cv2.putText(img,"Distance: "+str(round(distance/1000,2))+'m',(int(x_max-180),int(y_max+30)),cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),1)
                 
                 new_frame_time=time.time()
                 fps = 1/(new_frame_time-prev_frame_time)
