@@ -37,20 +37,18 @@ def main() :
 
     # Prepare new image size to retrieve half-resolution images
     image_size = zed.get_camera_information().camera_resolution
-    image_size.width = image_size.width /2
-    image_size.height = image_size.height /2
+    #image_size.width = image_size.width /2
+    #image_size.height = image_size.height /2
 
     # Declare your sl.Mat matrices
     image_zed = sl.Mat(image_size.width, image_size.height, sl.MAT_TYPE.U8_C4)
     depth_image_zed = sl.Mat(image_size.width, image_size.height, sl.MAT_TYPE.U8_C4)
     point_cloud = sl.Mat()
-    #=======================================  yolov4  video test et ============================================           
-    #======== Yolov4 tensorrt ağırlıklarını yüklemektedir ===================
     
     
     #=========== Yolov4 TensorRt ağırlıkları yüklenmektedir =======================
     
-    category_num = 80
+    category_num = 17
     model_trt = 'yolov4'
     letter_box = False
     if category_num <= 0:
@@ -70,88 +68,25 @@ def main() :
         
         
     key = ' '
-    LABELS = [
-    'person',
-    'bicycle',
-    'car',
-    'motorbike',
-    'aeroplane',
-    'bus',
-    'train',
-    'truck',
-    'boat',
-    'traffic light',
-    'fire hydrant',
-    'stop sign',
-    'parking meter',
-    'bench',
-    'bird',
-    'cat',
-    'dog',
-    'horse',
-    'sheep',
-    'cow',
-    'elephant',
-    'bear',
-    'zebra',
-    'giraffe',
-    'backpack',
-    'umbrella',
-    'handbag',
-    'tie',
-    'suitcase',
-    'frisbee',
-    'skis',
-    'snowboard',
-    'sports ball',
-    'kite',
-    'baseball bat',
-    'baseball glove',
-    'skateboard',
-    'surfboard',
-    'tennis racket',
-    'bottle',
-    'wine glass',
-    'cup',
-    'fork',
-    'knife',
-    'spoon',
-    'bowl',
-    'banana',
-    'apple',
-    'sandwich',
-    'orange',
-    'broccoli',
-    'carrot',
-    'hot dog',
-    'pizza',
-    'donut',
-    'cake',
-    'chair',
-    'sofa',
-    'pottedplant',
-    'bed',
-    'diningtable',
-    'toilet',
-    'tvmonitor',
-    'laptop',
-    'mouse',
-    'remote',
-    'keyboard',
-    'cell phone',
-    'microwave',
-    'oven',
-    'toaster',
-    'sink',
-    'refrigerator',
-    'book',
-    'clock',
-    'vase',
-    'scissors',
-    'teddy bear',
-    'hair drier',
-    'toothbrush',
-]
+    LABELS = [ 'girilmez',
+                'tasit_trafigine_kapali',
+                'duz_veya_sola',
+                'duz_veya_saga',
+                'yalnizca_sola',
+                '20_hiz_limiti_sonu',
+                '30_limit',
+                '20_limit',
+                'yalnizca_saga',
+                'saga_donulmez',
+                'sola_donulmez',
+                'dur',
+                'park_yapilmaz',
+                'park',
+                'durak',
+                'kirmizi_isk',
+                'sari_isik',
+                'yesil_isik']
+                
     COLORS = [[0, 0, 255]]
     prev_frame_time=0
     new_frame_time=0
@@ -173,17 +108,17 @@ def main() :
             #depth_image_ocv = depth_image_zed.get_data()
             classes,confidences,boxes = YOLOv4_video(image_ocv)
             
-            for cl,score,(left,top,width,height) in zip(classes,confidences,boxes):
-                start_pooint = (int(left),int(top))
-                end_point = (int(left+width),int(top+height))
+            for cl,score,(x_min,y_min,x_max,y_max) in zip(classes,confidences,boxes):
+                start_pooint = (int(x_min),int(y_min))
+                end_point = (int(x_max),int(y_max))
                 
-                x = int(left + width/2)
-                y = int(top + height/2)
+                x = int(x_min +( x_max-x_min)/2)
+                y = int(y_min + (y_max-y_min)/2)
                 color = COLORS[0]
                 img =cv2.rectangle(image_ocv,start_pooint,end_point,color,3)
                 img = cv2.circle(img,(x,y),5,[0,0,255],5)
                 text = f'{LABELS[int(cl)]}: {score:0.2f}'
-                cv2.putText(img,text,(int(left),int(top-7)),cv2.FONT_ITALIC,1,COLORS[0],2 )
+                cv2.putText(img,text,(int(x_min),int(y_min-7)),cv2.FONT_ITALIC,1,COLORS[0],2 )
                 
                 x = round(x)
                 y = round(y)
