@@ -11,25 +11,19 @@ You need to edit the codes in `zed.py` line according to yourself.
 
 specify the yolo weights and config files you trained before.
 ~~~~~~~~~~~~
-7. weightsPath = "yolov4-obj_last.weights"
-8. configPath = "yolov4-obj.cfg"
+45. weightsPath = "yolov4-obj_last.weights"
+46. configPath = "yolov4-obj.cfg"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Specify the video path you want to test.
-
-~~~~~~~~~~
-14. cap = cv2.VideoCapture('2.mp4')
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 then you need to edit the following lines in `zed.py` 
 
 Size should be changed according to your config file
 ~~~~~~
-8. model.setInputParams(size=(608, 608), scale=1/255, swapRB=True)
+56. model.setInputParams(size=(608, 608), scale=1/255, swapRB=True)
 ~~~~~~~~~~~~~~~~~~~~
 Edit them according to your class labels.
 ~~~~~~~~~~~~
-13.  LABELS = [ 'class_name1',
+68.  LABELS = [ 'class_name1',
                 'class_name2',
                 'class_name3',
                 'class_name3',
@@ -38,9 +32,8 @@ Edit them according to your class labels.
                 .
                 ]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
-that's all, if your model predicts well enough, it will predict and start labeling.
-After the process is finished, you can check the labels with a labeling program and edit them again.
+that's all, if you have a zed camera you can easily find the distance of the objects you have detected
 ## You can see how the program works in the gif below.
 
-![into mp4](https://github.com/MehmetOKUYAR/Zed_Yolo_distance_measurement/blob/master/intro.mp4)
+![into gif](https://github.com/MehmetOKUYAR/Zed_Yolo_distance_measurement/blob/master/intro.gif)
 
