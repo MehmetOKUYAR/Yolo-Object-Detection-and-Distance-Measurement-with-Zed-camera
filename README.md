@@ -32,8 +32,7 @@ Edit them according to your class labels.
                 .
                 ]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     
-that's all, if your model predicts well enough, it will predict and start labeling.
-After the process is finished, you can check the labels with a labeling program and edit them again.
+that's all, if you have a zed camera you can easily find the distance of the objects you have detected
 ## You can see how the program works in the gif below.
 
 ![into gif](https://github.com/MehmetOKUYAR/Zed_Yolo_distance_measurement/blob/master/intro.gif)
