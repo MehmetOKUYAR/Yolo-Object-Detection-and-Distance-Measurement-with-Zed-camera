@@ -42,5 +42,5 @@ that's all, if your model predicts well enough, it will predict and start labeli
 After the process is finished, you can check the labels with a labeling program and edit them again.
 ## You can see how the program works in the gif below.
 
-![into mp4](https://github.com/MehmetOKUYAR/Zed_Yolo_distance_measurement/blob/master/intro.mp4)
+![into gif](https://github.com/MehmetOKUYAR/Zed_Yolo_distance_measurement/blob/master/intro.gif)
 
