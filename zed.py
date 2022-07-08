@@ -3,17 +3,59 @@ import numpy as np
 import pyzed.sl as sl
 import cv2
 import math
+import logging
+import getopt
 
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-def main() :
+def main(argv) :
+    config_path = "yolov41-tiny.cfg"
+    weight_path = "yolov41-tiny.weights"
+    meta_path = "coco1.names"
+    svo_path = None
+    zed_id = 0
+
+    help_str = 'zed_yolo.py -c <config> -w <weight> -m <meta> -s <svo_file> -z <zed_id>'
+
+    try:
+        opts, args = getopt.getopt(
+            argv, "hc:w:m:s:z:", ["config=", "weight=", "meta=", "svo_file=", "zed_id="])
+    except getopt.GetoptError:
+        log.exception(help_str)
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            log.info(help_str)
+            sys.exit()
+        elif opt in ("-c", "--config"):
+            config_path = arg
+        elif opt in ("-w", "--weight"):
+            weight_path = arg
+        elif opt in ("-m", "--meta"):
+            meta_path = arg
+        elif opt in ("-s", "--svo_file"):
+            svo_path = arg
+        elif opt in ("-z", "--zed_id"):
+            zed_id = int(arg)
+
+    # Set configuration parameters
+    input_type = sl.InputType()
+
+    if svo_path is not None:
+        log.info("SVO file : " + svo_path)
+        input_type.set_from_svo_file(svo_path)
+    else:
+        # Launch camera by id
+        input_type.set_from_camera_id(zed_id)
 
     # Create a ZED camera object
     zed = sl.Camera()
 
     # Set configuration parameters
     input_type = sl.InputType()
-    if len(sys.argv) >= 2 :
-        input_type.set_from_svo_file(sys.argv[1])
+
     init = sl.InitParameters(input_t=input_type)
     init.camera_resolution = sl.RESOLUTION.HD1080
     init.depth_mode = sl.DEPTH_MODE.PERFORMANCE
@@ -33,8 +75,8 @@ def main() :
 
     # Prepare new image size to retrieve half-resolution images
     image_size = zed.get_camera_information().camera_resolution
-    image_size.width = image_size.width /2
-    image_size.height = image_size.height /2
+    image_size.width = image_size.width 
+    image_size.height = image_size.height 
 
     # Declare your sl.Mat matrices
     image_zed = sl.Mat(image_size.width, image_size.height, sl.MAT_TYPE.U8_C4)
@@ -42,13 +84,13 @@ def main() :
     point_cloud = sl.Mat()
     #=======================================  yolov4  video test et ============================================           
     #======== Yolov4 Tiny ağırlıklarını yüklemektedir ===================
-    weightsPath_tiny = "yolov4.weights"
-    configPath_tiny = "yolov4.cfg"
+    weightsPath_tiny = weight_path
+    configPath_tiny = config_path
 
-    tiny_net = cv2.dnn.readNet(weightsPath_tiny, configPath_tiny)
-    tiny_net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-    tiny_net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
-    model = cv2.dnn_DetectionModel(tiny_net)
+    net = cv2.dnn.readNet(weightsPath_tiny, configPath_tiny)
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
+    model = cv2.dnn_DetectionModel(net)
     
  
     
@@ -63,92 +105,17 @@ def main() :
         
         return classes,confidences,boxes
         
-        
-    key = ' '
-    LABELS = [
-    'person',
-    'bicycle',
-    'car',
-    'motorbike',
-    'aeroplane',
-    'bus',
-    'train',
-    'truck',
-    'boat',
-    'traffic light',
-    'fire hydrant',
-    'stop sign',
-    'parking meter',
-    'bench',
-    'bird',
-    'cat',
-    'dog',
-    'horse',
-    'sheep',
-    'cow',
-    'elephant',
-    'bear',
-    'zebra',
-    'giraffe',
-    'backpack',
-    'umbrella',
-    'handbag',
-    'tie',
-    'suitcase',
-    'frisbee',
-    'skis',
-    'snowboard',
-    'sports ball',
-    'kite',
-    'baseball bat',
-    'baseball glove',
-    'skateboard',
-    'surfboard',
-    'tennis racket',
-    'bottle',
-    'wine glass',
-    'cup',
-    'fork',
-    'knife',
-    'spoon',
-    'bowl',
-    'banana',
-    'apple',
-    'sandwich',
-    'orange',
-    'broccoli',
-    'carrot',
-    'hot dog',
-    'pizza',
-    'donut',
-    'cake',
-    'chair',
-    'sofa',
-    'pottedplant',
-    'bed',
-    'diningtable',
-    'toilet',
-    'tvmonitor',
-    'laptop',
-    'mouse',
-    'remote',
-    'keyboard',
-    'cell phone',
-    'microwave',
-    'oven',
-    'toaster',
-    'sink',
-    'refrigerator',
-    'book',
-    'clock',
-    'vase',
-    'scissors',
-    'teddy bear',
-    'hair drier',
-    'toothbrush',
-]
-    COLORS = [[0, 0, 255]]
-    while key != 113 :
+    LABELS = []
+    with open(meta_path, 'r') as f:
+        LABELS = [cname.strip() for cname in f.readlines()]
+
+    COLORS = [[0, 0, 255], [30, 255, 255], [0,255,0]]
+
+    frame_count = 0
+
+    exit_flag = True
+
+    while(exit_flag == True):
         err = zed.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS :
             # Retrieve the left image, depth image in the half-resolution
@@ -172,29 +139,30 @@ def main() :
                 
                 x = int(left + width/2)
                 y = int(top + height/2)
+
                 color = COLORS[0]
+
                 img =cv2.rectangle(image_ocv,start_pooint,end_point,color,3)
                 img = cv2.circle(img,(x,y),5,[0,0,255],5)
-                text = f'{LABELS[cl[0]]}: {score[0]:0.2f}'
-                cv2.putText(img,text,(int(left),int(top-7)),cv2.FONT_ITALIC,1,COLORS[0],2 )
+                text = f'{LABELS[cl]}: {score:0.2f}'
+                cv2.putText(img, text, (int(left), int(top-7)), cv2.FONT_ITALIC, 1, COLORS[0], 2 )
                 
                 x = round(x)
                 y = round(y)
-                err, point_cloud_value = point_cloud.get_value(x, y)
-                distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
-                                    point_cloud_value[1] * point_cloud_value[1] +
-                                    point_cloud_value[2] * point_cloud_value[2])
 
-                print("Distance to Camera at (class : {0}, score : {1:0.2f}): distance : {2:0.2f} mm".format(LABELS[cl[0]], score[0], distance), end="\r")
-                cv2.putText(img,"Distance: "+str(round(distance/1000,2))+'m',(int(int(left+width)-180),int(int(top+height)+30)),cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0),1)
+                err, point_cloud_value = point_cloud.get_value(x, y)
+                distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] + point_cloud_value[1] * point_cloud_value[1] + point_cloud_value[2] * point_cloud_value[2])
+
+                print("Distance to Camera at (class : {0}, score : {1:0.2f}): distance : {2:0.2f} mm".format(LABELS[cl], score, distance), end="\r")
                 
-                cv2.imshow("Image", img)
-                    
+                cv2.putText(img,"Distance: "+str(round(distance/1000,2))+'m', (int(left), int(top + 25)) , cv2.FONT_HERSHEY_COMPLEX, 1, COLORS[1], 2)
+                
+            cv2.imshow("Image", img)
             
-            #cv2.imshow("Image", image_ocv)
-            #cv2.imshow("Depth", depth_image_ocv)
+            frame_count = frame_count + 1
             
-            key = cv2.waitKey(1)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                exit_flag = False
 
 
     cv2.destroyAllWindows()
@@ -203,4 +171,4 @@ def main() :
     print("\nFINISH")
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
