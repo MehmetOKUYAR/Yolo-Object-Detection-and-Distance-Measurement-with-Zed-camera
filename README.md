@@ -43,11 +43,11 @@ For instance :
         
 For running with custom weights :
 
-        python3 zed_yolo.py -c yolov4-custom.cfg -w yolov4-custom.weights -m obj.names -z 1
+        python3 zed.py -c yolov4-custom.cfg -w yolov4-custom.weights -m obj.names -z 1
 
 To display the help :
 
-        python3 zed_yolo.py -h
+        python3 zed.py -h
  
 that's all, if you have a zed camera you can easily find the distance of the objects you have detected
 ## You can see how the program works in the gif below.
