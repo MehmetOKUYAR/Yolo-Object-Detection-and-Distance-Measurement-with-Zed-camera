@@ -52,5 +52,7 @@ To display the help :
 that's all, if you have a zed camera you can easily find the distance of the objects you have detected
 ## You can see how the program works in the gif below.
 
-![into gif](https://github.com/MehmetOKUYAR/Zed_Yolo_distance_measurement/blob/master/intro.gif)
 
+<p align="center">
+  <img src="intro.gif" width=100%>
+</p>
