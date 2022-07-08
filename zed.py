@@ -10,9 +10,9 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 def main(argv) :
-    config_path = "yolov41-tiny.cfg"
-    weight_path = "yolov41-tiny.weights"
-    meta_path = "coco1.names"
+    config_path = "yolov4-tiny.cfg"
+    weight_path = "yolov4-tiny.weights"
+    meta_path = "coco.names"
     svo_path = None
     zed_id = 0
 
